@@ -9,3 +9,4 @@
     ipmi_user: root
     ipmi_password: simpsons
     kernel_params: "intel_iommu=on iommu=pt pcie_acs_override=downstream pci-stub.ids=8086:1d6b"
+    ansible_python_interpreter: '/usr/bin/python'
