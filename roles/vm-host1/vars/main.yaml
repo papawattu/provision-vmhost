@@ -5,8 +5,4 @@
     server_netdev_mac: 00:1e:67:a8:74:d6
     fast_netdev: ens5
     fast_netdev_ip: 10.0.0.1/24
-    ipmi_address: 192.168.1.82
-    ipmi_user: root
-    ipmi_password: simpsons
-    kernel_params: "intel_iommu=on iommu=pt pcie_acs_override=downstream pci-stub.ids=8086:1d6b"
     ansible_python_interpreter: '/usr/bin/python'
