@@ -1,0 +1,32 @@
+---
+    - name: Create a new primary partition for LVM
+      parted:
+        device: /dev/sdd
+        number: 1
+        flags: [ lvm ]
+        state: present
+        part_type: primary
+    - name: Create a new primary partition for LVM
+      parted:
+        device: /dev/sde
+        number: 1
+        flags: [ lvm ]
+        state: present
+        part_type: primary
+    - name: Create vg
+      lvg:
+        vg: fast-ssd
+        state: present
+        pvs: 
+        - /dev/sdd1
+        - /dev/sde1
+    - name: Get storage pool
+      virt_pool:
+        command: facts
+    - name: Create storage pool
+      virt_pool:
+        command: define
+        name: fast-ssd
+        state: present
+        xml: '{{ lookup("template", "lvm.xml.j2") }}'
+        autostart: yes
