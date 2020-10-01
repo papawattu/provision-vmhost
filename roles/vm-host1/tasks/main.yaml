@@ -61,13 +61,13 @@
     service:
       name: cron
       state: restarted
-      - name: Create a new primary partition for LVM
-        parted:
-          device: /dev/sdd
-          number: 1
-          flags: [ lvm ]
-          state: present
-          part_type: primary
+  - name: Create a new primary partition for LVM
+    parted:
+      device: /dev/sdd
+      number: 1
+      flags: [ lvm ]
+      state: present
+      part_type: primary
   - name: Create a new primary partition for LVM
     parted:
       device: /dev/sde
