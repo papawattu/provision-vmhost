@@ -7,7 +7,7 @@
       install_recommends: no
     vars:
       packages:
-        - pip
+        - python-pip
         - htop
         - qemu-kvm
         - libvirt-clients 
