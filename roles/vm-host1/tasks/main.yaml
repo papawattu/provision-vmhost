@@ -1,32 +1,94 @@
 ---
-    - name: Create a new primary partition for LVM
-      parted:
-        device: /dev/sdd
-        number: 1
-        flags: [ lvm ]
-        state: present
-        part_type: primary
-    - name: Create a new primary partition for LVM
-      parted:
-        device: /dev/sde
-        number: 1
-        flags: [ lvm ]
-        state: present
-        part_type: primary
-    - name: Create vg
-      lvg:
-        vg: fast-ssd
-        state: present
-        pvs: 
-        - /dev/sdd1
-        - /dev/sde1
-    - name: Get storage pool
-      virt_pool:
-        command: facts
-    - name: Create storage pool
-      virt_pool:
-        command: define
-        name: fast-ssd
-        state: present
-        xml: '{{ lookup("template", "lvm.xml.j2") }}'
-        autostart: yes
+  - name: install packages
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: true
+      install_recommends: no
+    vars:
+      packages:
+        - htop
+        - qemu-kvm
+        - libvirt-clients 
+        - libvirt-daemon-system
+        - netcat-openbsd
+        - dnsmasq
+        - bmon
+        - python-libvirt
+        - lvm2
+        - net-tools
+        - bridge-utils
+        - parted
+        - python-lxml
+  - name: Set hostname
+    hostname : 
+      name: "{{ inventory_hostname }}"
+  - name: Add IP address of all hosts to all hosts
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '.*{{ item }}$'
+      line: "{{ hostvars[item].ansible_host }} {{item}}"
+      state: present
+    when: hostvars[item].ansible_host is defined
+    with_items: "{{ groups.all }}"
+  - name: Setup network bridges
+    template: 
+      src: network/{{ item }}.netdev.j2
+      dest: /etc/systemd/network/{{ item }}.netdev
+    with_items:
+      - br0
+      - br1
+  - name: Setup networks
+    template: 
+      src: network/{{ item }}.network.j2
+      dest: /etc/systemd/network/{{ item }}.network
+    with_items:
+      - home
+      - server
+      - fast
+      - br0
+      - br1
+  - name: Shutdown at midnight
+    cron:
+      name: "Shutdown"
+      minute: "55"
+      hour: "23"
+      job: "systemctl poweroff"
+  - name: Set timezone
+    timezone:
+      name: Europe/London
+  - name: Restart cron
+    service:
+      name: cron
+      state: restarted
+      - name: Create a new primary partition for LVM
+        parted:
+          device: /dev/sdd
+          number: 1
+          flags: [ lvm ]
+          state: present
+          part_type: primary
+  - name: Create a new primary partition for LVM
+    parted:
+      device: /dev/sde
+      number: 1
+      flags: [ lvm ]
+      state: present
+      part_type: primary
+  - name: Create vg
+    lvg:
+      vg: fast-ssd
+      state: present
+      pvs: 
+      - /dev/sdd1
+      - /dev/sde1
+  - name: Get storage pool
+    virt_pool:
+      command: facts
+  - name: Create storage pool
+    virt_pool:
+      command: define
+      name: fast-ssd
+      state: present
+      xml: '{{ lookup("template", "lvm.xml.j2") }}'
+      autostart: yes
