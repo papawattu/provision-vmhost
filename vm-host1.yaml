@@ -1,4 +1,4 @@
 - hosts: localhost
   tasks:
-    roles:
-    - role: vm-host1
+  roles:
+  - role: vm-host1
